@@ -318,8 +318,22 @@
             border-bottom: 1px solid #334155;
         }
 
+        /* Todas as linhas com fundo uniforme */
+        tr {
+            background: #1e293b;
+        }
+
+        tr:hover {
+            background: #2d3748;
+        }
+
+        tr.selected {
+            background: #1e3a5f !important;
+        }
+
+        /* REMOVA ou COMENTE este bloco */
         tr:nth-child(even) {
-            background: #1a1f2b;
+            background: #202531;
         }
 
         tr:hover {
@@ -428,19 +442,6 @@
             font-style: italic;
         }
 
-        .file-upload {
-            position: relative;
-            display: inline-block;
-        }
-
-        .file-upload input {
-            position: absolute;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
-
         .loading {
             display: none;
             position: fixed;
@@ -462,13 +463,14 @@
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #1e293b;
-            border-top: 4px solid #3b82f6;
+            width: 80px;
+            height: 80px;
+            border: 6px solid #1e293b;
+            border-top: 6px solid #3b82f6;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 20px;
+            /* Reduzido de 120px para 20px */
         }
 
         @keyframes spin {
@@ -481,7 +483,7 @@
             }
         }
 
-        /* Estilo para a barra de informação (mantendo o mesmo padrão visual) */
+        /* Estilo para a barra de informação */
         .info-bar {
             background: #1e3a5f;
             color: #e1e9f0;
@@ -498,130 +500,150 @@
 </head>
 
 <body>
+    <!-- Loading com logos -->
     <div class="loading" id="loading">
-        <div class="spinner"></div>
-        <div id="loadingMessage">Processando dados...</div>
+        <div
+            style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh;">
+            <div style="display: flex; align-items: center; gap: 30px; margin-bottom: 40px;">
+                <img src="FW Logo.png" alt="FW" style="width: 150px; height: 30px; object-fit: contain;">
+                <img src="Altercon Logo.png" alt="Altercon" style="width: 150px; height: 30px; object-fit: contain;">
+                <img src="Delservin Logo.png" alt="Delservin" style="width: 150px; height: 30px; object-fit: contain;">
+            </div>
+            <div class="spinner"></div>
+            <div id="loadingMessage" style="margin-top: 20px; font-size: 16px;">Carregando dados do Supabase...</div>
+        </div>
     </div>
 
     <div class="container">
         <div class="header">
             <h1>Comparativo: Consertar vs Comprar Ferramentas</h1>
-            <p>Análise de viabilidade econômica para ferramentas v2</p>
+            <p>Análise de viabilidade econômica para ferramentas V2</p>
         </div>
 
         <!-- Box com logos -->
-        <div class="logos-box">
+        <div class="logos-box" style="display: flex; align-items: center; justify-content: space-between;">
+            <!-- FW (esquerda) -->
             <div class="logo-item">
-                <div class="logo-fw">FW</div>
-                <span>Galpão FW</span>
+                <img src="FW Logo.png" alt="FW Logo" style="width: 200px; height: 50px; object-fit: contain;"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="logo-fw" style="display: none;">FW</div>
             </div>
-            <div class="logo-item">
-                <div class="logo-delservin">DS</div>
-                <span>Delservin</span>
+
+            <!-- Altercon (centro) -->
+            <div class="logo-item" style="margin-left: 300px;">
+                <img src="Altercon Logo.png" alt="Altercon Logo"
+                    style="width: 200px; height: 50px; object-fit: contain;"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="logo-altercon" style="display: none;">AC</div>
             </div>
-            <div class="logo-item">
-                <div class="logo-altercon">AC</div>
-                <span>Altercon</span>
+
+            <!-- Delservin (direita) -->
+            <div class="logo-item" style="margin-left: auto;">
+                <img src="Delservin Logo.png" alt="Delservin Logo"
+                    style="width: 200px; height: 40px; object-fit: contain;"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="logo-delservin" style="display: none;">DS</div>
             </div>
         </div>
+    </div>
+    </div>
 
-        <!-- Barra de informação da fonte de dados -->
-        <div class="info-bar" id="infoBar">
-            <i class="fas fa-cloud" id="infoIcon"></i>
-            <span id="infoMessage">Carregando dados do Supabase...</span>
+    <!-- Barra de informação da fonte de dados -->
+    <div class="info-bar" id="infoBar">
+        <i class="fas fa-cloud" id="infoIcon"></i>
+        <span id="infoMessage">Carregando dados do Supabase...</span>
+    </div>
+
+    <div class="filters">
+        <div class="filter-group">
+            <label>Status</label>
+            <select id="statusFilter">
+                <option value="todos">Todos os Status</option>
+                <option value="Disponível">Disponível</option>
+                <option value="manutenção">Em Manutenção</option>
+                <option value="danificado">Danificado</option>
+                <option value="bom">Bom</option>
+                <option value="reservado">Reservado</option>
+            </select>
         </div>
-
-        <div class="filters">
-            <div class="filter-group">
-                <label>Status</label>
-                <select id="statusFilter">
-                    <option value="todos">Todos os Status</option>
-                    <option value="Disponível">Disponível</option>
-                    <option value="manutenção">Em Manutenção</option>
-                    <option value="danificado">Danificado</option>
-                    <option value="bom">Bom</option>
-                    <option value="reservado">Reservado</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Categoria</label>
-                <select id="categoriaFilter">
-                    <option value="todos">Todas as Categorias</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Buscar</label>
-                <input type="text" id="searchFilter" placeholder="Nome ou patrimônio...">
-            </div>
-            <div class="filter-group">
-                <label>&nbsp;</label>
-                <button class="btn btn-primary" onclick="aplicarFiltros()">
-                    🔍 Aplicar Filtros
-                </button>
-            </div>
+        <div class="filter-group">
+            <label>Categoria</label>
+            <select id="categoriaFilter">
+                <option value="todos">Todas as Categorias</option>
+            </select>
         </div>
-
-        <div class="summary-cards" id="summaryCards">
-            <!-- Cards serão preenchidos dinamicamente -->
+        <div class="filter-group">
+            <label>Buscar</label>
+            <input type="text" id="searchFilter" placeholder="Nome ou patrimônio...">
         </div>
-
-        <!-- Barra de seleção -->
-        <div class="selection-bar">
-            <div class="selection-info">
-                <span><strong id="selectedCount">0</strong> itens selecionados</span>
-                <span style="margin-left: 20px;">Total: R$ <span id="selectedTotal">0,00</span></span>
-            </div>
-            <button class="btn btn-secondary" onclick="selecionarTodos()">
-                <i class="fas fa-check-double"></i> Selecionar Todos
-            </button>
-            <button class="btn btn-secondary" onclick="limparSelecao()">
-                <i class="fas fa-times"></i> Limpar Seleção
+        <div class="filter-group">
+            <label>&nbsp;</label>
+            <button class="btn btn-primary" onclick="aplicarFiltros()">
+                🔍 Aplicar Filtros
             </button>
         </div>
+    </div>
 
-        <div class="actions">
-            <button class="btn btn-primary" onclick="recarregarDoSupabase()">
-                <i class="fas fa-sync-alt"></i> Recarregar do Supabase
-            </button>
-            <div class="file-upload">
-                <button class="btn btn-info">
-                    <i class="fas fa-file-import"></i> Importar CSV
-                </button>
-                <input type="file" id="csvUpload" accept=".csv,.xlsx,.xls" onchange="importarArquivo(this)">
-            </div>
-            <button class="btn btn-success" onclick="gerarExcelRomaneio()">
-                📊 Gerar Excel (Layout Romaneio)
-            </button>
-        </div>
+    <div class="summary-cards" id="summaryCards">
+        <!-- Cards serão preenchidos dinamicamente -->
+    </div>
 
-        <div class="table-container">
-            <table id="tabelaFerramentas">
-                <thead>
-                    <tr>
-                        <th class="checkbox-cell"><input type="checkbox" id="selectAllCheckbox"
-                                onclick="toggleAllCheckboxes(this)"></th>
-                        <th>Nº</th>
-                        <th>Patrimônio</th>
-                        <th>Ferramenta</th>
-                        <th>Status</th>
-                        <th>Custo Conserto (R$)</th>
-                        <th>Preço Novo (R$)</th>
-                        <th>Economia (R$)</th>
-                        <th>Economia %</th>
-                        <th>Decisão</th>
-                    </tr>
-                </thead>
-                <tbody id="tabelaBody">
-                    <tr>
-                        <td colspan="10" style="text-align: center; padding: 40px; color: #64748b;">
-                            <i class="fas fa-cloud" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
-                            <br>
-                            Carregando dados do Supabase...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- Barra de seleção -->
+    <div class="selection-bar">
+        <div class="selection-info">
+            <span><strong id="selectedCount">0</strong> itens selecionados</span>
+            <span style="margin-left: 20px;">Total: R$ <span id="selectedTotal">0,00</span></span>
         </div>
+        <button class="btn btn-secondary" onclick="selecionarTodos()">
+            <i class="fas fa-check-double"></i> Selecionar Todos
+        </button>
+        <button class="btn btn-secondary" onclick="limparSelecao()">
+            <i class="fas fa-times"></i> Limpar Seleção
+        </button>
+    </div>
+
+    <div class="actions">
+        <button class="btn btn-primary" onclick="recarregarDoSupabase()">
+            <i class="fas fa-sync-alt"></i> Recarregar do Supabase
+        </button>
+        <button class="btn btn-info" onclick="document.getElementById('csvUpload').click()">
+            <i class="fas fa-file-import"></i> Importar CSV
+        </button>
+        <input type="file" id="csvUpload" style="display: none;" accept=".csv,.xlsx,.xls"
+            onchange="importarArquivo(this)">
+        <button class="btn btn-success" onclick="gerarExcelRomaneio()">
+            📊 Gerar Excel (Layout Romaneio)
+        </button>
+    </div>
+
+    <div class="table-container">
+        <table id="tabelaFerramentas">
+            <thead>
+                <tr>
+                    <th class="checkbox-cell"><input type="checkbox" id="selectAllCheckbox"
+                            onclick="toggleAllCheckboxes(this)"></th>
+                    <th>Nº</th>
+                    <th>Patrimônio</th>
+                    <th>Ferramenta</th>
+                    <th>Status</th>
+                    <th>Custo Conserto (R$)</th>
+                    <th>Preço Novo (R$)</th>
+                    <th>Economia (R$)</th>
+                    <th>Economia %</th>
+                    <th>Decisão</th>
+                </tr>
+            </thead>
+            <tbody id="tabelaBody">
+                <tr>
+                    <td colspan="10" style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-cloud" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                        <br>
+                        Carregando dados do Supabase...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
     </div>
 
     <script>
@@ -656,17 +678,17 @@
         function converterParaNumero(valor) {
             if (typeof valor === 'number') return valor;
             if (!valor) return 0;
-            
+
             let valorStr = String(valor).trim();
             valorStr = valorStr.replace(/[Rr]\$\s*/g, '');
-            
+
             if (valorStr.includes(',') && !valorStr.includes('.')) {
                 valorStr = valorStr.replace(/\./g, '');
                 valorStr = valorStr.replace(',', '.');
             } else if (valorStr.includes(',') && valorStr.includes('.')) {
                 const ultimaVirgula = valorStr.lastIndexOf(',');
                 const ultimoPonto = valorStr.lastIndexOf('.');
-                
+
                 if (ultimoPonto > ultimaVirgula) {
                     valorStr = valorStr.replace(/,/g, '');
                 } else {
@@ -674,7 +696,7 @@
                     valorStr = valorStr.replace(',', '.');
                 }
             }
-            
+
             const num = parseFloat(valorStr);
             return isNaN(num) ? 0 : num;
         }
@@ -684,13 +706,13 @@
         // ============================================
         async function buscarDoSupabase() {
             document.getElementById('loading').classList.add('active');
-            document.getElementById('loadingMessage').innerHTML = 'Calma Emerson afobado...';
-            document.getElementById('infoMessage').innerHTML = 'Conectando ao Servidor...';
+            document.getElementById('loadingMessage').innerHTML = 'Conectando ao Supabase...';
+            document.getElementById('infoMessage').innerHTML = 'Conectando ao Supabase...';
             document.getElementById('infoIcon').className = 'fas fa-cloud';
 
             try {
                 const url = `${SUPABASE_CONFIG.url}/rest/v1/tools?select=*`;
-                
+
                 const response = await fetch(url, {
                     headers: {
                         'apikey': SUPABASE_CONFIG.key,
@@ -703,7 +725,7 @@
                 }
 
                 const dados = await response.json();
-                
+
                 if (dados && dados.length > 0) {
                     processarDadosSupabase(dados);
                     document.getElementById('infoMessage').innerHTML = 'Dados carregados do Supabase (online)';
@@ -715,14 +737,13 @@
                 console.error('Erro ao buscar do Supabase:', error);
                 document.getElementById('infoMessage').innerHTML = 'Erro ao conectar. Use "Importar CSV" para dados offline.';
                 document.getElementById('infoIcon').className = 'fas fa-exclamation-triangle';
-                
-                // Limpar tabela
+
                 ferramentas = [];
                 categorias = [];
                 custosConserto = {};
                 precosNovo = {};
                 aplicarFiltros();
-                
+
             } finally {
                 document.getElementById('loading').classList.remove('active');
             }
@@ -742,8 +763,7 @@
             }));
 
             categorias = [...new Set(ferramentas.map(f => f.categoria))];
-            
-            // Inicializar preços com base no valor de compra
+
             ferramentas.forEach(f => {
                 if (f.valor_compra > 0) {
                     precosNovo[f.id] = f.valor_compra;
@@ -765,9 +785,14 @@
         // IMPORTAR ARQUIVO (CSV/EXCEL) - OFFLINE
         // ============================================
         function importarArquivo(input) {
-            if (!input.files || !input.files[0]) return;
+            if (!input.files || !input.files[0]) {
+                alert('Selecione um arquivo para importar');
+                return;
+            }
 
             const file = input.files[0];
+            console.log('Arquivo selecionado:', file.name);
+
             const reader = new FileReader();
 
             document.getElementById('loading').classList.add('active');
@@ -775,7 +800,7 @@
             document.getElementById('infoMessage').innerHTML = `Dados carregados do arquivo: ${file.name} (offline)`;
             document.getElementById('infoIcon').className = 'fas fa-file-import';
 
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 try {
                     const data = e.target.result;
                     const extension = file.name.split('.').pop().toLowerCase();
@@ -785,9 +810,9 @@
                     } else {
                         processarExcel(data);
                     }
-                    
+
                     input.value = '';
-                    
+
                 } catch (error) {
                     console.error('Erro:', error);
                     alert('Erro ao processar arquivo: ' + error.message);
@@ -795,7 +820,7 @@
                 }
             };
 
-            reader.onerror = function() {
+            reader.onerror = function () {
                 alert('Erro ao ler o arquivo');
                 document.getElementById('loading').classList.remove('active');
             };
@@ -815,13 +840,13 @@
                 const linhas = csvData.split('\n')
                     .map(linha => linha.trim())
                     .filter(linha => linha.length > 0);
-                
+
                 if (linhas.length < 2) throw new Error('Arquivo CSV vazio');
 
                 const primeiraLinha = linhas[0];
                 const separador = primeiraLinha.includes(';') ? ';' : ',';
-                
-                let cabecalho = linhas[0].split(separador).map(item => 
+
+                let cabecalho = linhas[0].split(separador).map(item =>
                     item.replace(/^\uFEFF/, '').replace(/^["']|["']$/g, '').trim()
                 );
 
@@ -832,11 +857,11 @@
                 for (let i = 1; i < linhas.length; i++) {
                     const linha = linhas[i];
                     if (!linha.trim()) continue;
-                    
+
                     const colunas = [];
                     let dentroAspas = false;
                     let valorAtual = '';
-                    
+
                     for (let char of linha) {
                         if (char === '"') {
                             dentroAspas = !dentroAspas;
@@ -848,15 +873,15 @@
                         }
                     }
                     colunas.push(valorAtual);
-                    
-                    const colunasLimpas = colunas.map(val => 
+
+                    const colunasLimpas = colunas.map(val =>
                         val.replace(/^["']|["']$/g, '').trim()
                     );
-                    
+
                     if (colunasLimpas.length < 5) continue;
 
                     const id = i;
-                    
+
                     let patrimonio = colunasLimpas[1] || `ID-${id}`;
                     let nome = colunasLimpas[2] || 'Sem nome';
                     let status = colunasLimpas[3] || 'Reservado';
@@ -881,10 +906,10 @@
                 atualizarFiltrosCategoria();
                 aplicarFiltros();
                 selecionarTodos();
-                
+
                 document.getElementById('loading').classList.remove('active');
                 alert(`${ferramentas.length} ferramentas importadas com sucesso!`);
-                
+
             } catch (error) {
                 console.error('Erro ao processar CSV:', error);
                 alert('Erro ao processar arquivo CSV: ' + error.message);
@@ -900,9 +925,9 @@
                 const workbook = XLSX.read(data, { type: 'binary' });
                 const primeiraPlanilha = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[primeiraPlanilha];
-                
+
                 const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                
+
                 if (jsonData.length < 2) throw new Error('Arquivo sem dados');
 
                 ferramentas = [];
@@ -914,11 +939,11 @@
                     if (!linha || linha.length === 0) continue;
 
                     const id = i;
-                    
+
                     const patrimonio = linha[1] ? String(linha[1]).trim() : `ID-${id}`;
                     const nome = linha[2] ? String(linha[2]).trim() : 'Sem nome';
                     const status = linha[3] ? String(linha[3]).trim() : 'Reservado';
-                    
+
                     const custo = linha[5] ? converterParaNumero(linha[5]) : 0;
                     const precoNovo = linha[6] ? converterParaNumero(linha[6]) : 0;
 
@@ -940,10 +965,10 @@
                 atualizarFiltrosCategoria();
                 aplicarFiltros();
                 selecionarTodos();
-                
+
                 document.getElementById('loading').classList.remove('active');
                 alert(`${ferramentas.length} ferramentas importadas com sucesso!`);
-                
+
             } catch (error) {
                 console.error('Erro ao processar Excel:', error);
                 alert('Erro ao processar arquivo Excel: ' + error.message);
@@ -974,7 +999,7 @@
                 if (status !== 'todos') {
                     const statusFerramenta = f.status ? f.status.toLowerCase() : '';
                     const statusFiltro = status.toLowerCase();
-                    
+
                     if (statusFiltro === 'manutenção' && !statusFerramenta.includes('manuten')) return false;
                     else if (statusFiltro === 'danificado' && !statusFerramenta.includes('danific')) return false;
                     else if (statusFiltro === 'disponível' && !statusFerramenta.includes('dispon')) return false;
@@ -1293,7 +1318,7 @@
         document.getElementById('searchFilter').addEventListener('keyup', aplicarFiltros);
 
         // INICIALIZAÇÃO
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             buscarDoSupabase();
         });
     </script>
