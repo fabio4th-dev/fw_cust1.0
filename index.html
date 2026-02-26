@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparativo: Consertar vs Comprar Ferramentas</title>
+    <link rel="icon" type="image/x-icon" href="fw_mini.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0c10;
+            padding: 20px;
+            min-height: 100vh;
+            color: #e1e9f0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #1a1f2b;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 1px solid #2d3748;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e1e9f0;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #60a5fa;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.8;
+            color: #94a3b8;
+        }
+
+        .logos-box {
+            background: #0f172a;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .logo-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+        }
+
+        .logo-fw,
+        .logo-delservin,
+        .logo-altercon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .logo-fw {
+            background: #3b82f6;
+        }
+
+        .logo-delservin {
+            background: #059669;
+        }
+
+        .logo-altercon {
+            background: #d97706;
+        }
+
+        .filters {
+            padding: 20px;
+            background: #111827;
+            border-bottom: 1px solid #2d3748;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #94a3b8;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 10px 12px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #e1e9f0;
+            transition: all 0.3s;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .filter-group select option {
+            background: #1e293b;
+            color: #e1e9f0;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-success {
+            background: #059669;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #047857;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(5, 150, 105, 0.3);
+        }
+
+        .btn-warning {
+            background: #d97706;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #b45309;
+        }
+
+        .btn-secondary {
+            background: #475569;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #334155;
+        }
+
+        .actions {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            background: #111827;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .summary-cards {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            border-left: 5px solid;
+            border: 1px solid #334155;
+        }
+
+        .card.total {
+            border-left-color: #3b82f6;
+        }
+
+        .card.repair {
+            border-left-color: #f59e0b;
+        }
+
+        .card.buy {
+            border-left-color: #10b981;
+        }
+
+        .card.savings {
+            border-left-color: #8b5cf6;
+        }
+
+        .card h3 {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #f8fafc;
+        }
+
+        .card .subtitle {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        .selection-bar {
+            padding: 15px 20px;
+            background: #0f172a;
+            margin: 0 20px 20px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid #2d3748;
+        }
+
+        .selection-info {
+            flex: 1;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .selection-info strong {
+            color: #60a5fa;
+            font-size: 18px;
+        }
+
+        .table-container {
+            padding: 0 20px 20px 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            color: #e1e9f0;
+            border: 1px solid #2d3748;
+        }
+
+        th {
+            background: #1e293b;
+            color: #94a3b8;
+            padding: 12px 8px;
+            font-weight: 600;
+            text-align: left;
+            border-bottom: 2px solid #3b82f6;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #334155;
+        }
+
+        tr:nth-child(even) {
+            background: #1a1f2b;
+        }
+
+        tr:hover {
+            background: #263445;
+        }
+
+        tr.selected {
+            background: #1e3a5f !important;
+        }
+
+        .checkbox-cell {
+            width: 30px;
+            text-align: center;
+        }
+
+        .checkbox-cell input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #3b82f6;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Vermelho para danificado */
+        .status-danificado,
+        .status-Danificado {
+            background: #991b1b;
+            color: #fee2e2;
+        }
+
+        /* Vermelho para manutenção */
+        .status-manutenção,
+        .status-Manutenção {
+            background: #991b1b;
+            color: #fee2e2;
+        }
+
+        /* Verde para disponível/bom */
+        .status-Disponível,
+        .status-disponível,
+        .status-bom,
+        .status-Bom {
+            background: #065f46;
+            color: #d1fae5;
+        }
+
+        /* Roxo para reservado */
+        .status-reservado,
+        .status-Reservado {
+            background: #6b21a8;
+            color: #f3e8ff;
+        }
+
+        .decision-badge {
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .decision-repair {
+            background: #f59e0b;
+            color: #000;
+        }
+
+        .decision-buy {
+            background: #10b981;
+            color: #000;
+        }
+
+        .valor-input {
+            width: 100px;
+            padding: 6px 8px;
+            background: #1e293b;
+            border: 1px solid #3b82f6;
+            border-radius: 4px;
+            color: #e1e9f0;
+            font-size: 13px;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+
+        .valor-input:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+
+        .valor-input::placeholder {
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            backdrop-filter: blur(4px);
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #1e293b;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div>Carregando dados da nuvem...</div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Comparativo: Consertar vs Comprar Ferramentas</h1>
+            <p>Análise de viabilidade econômica para ferramentas V1</p>
+        </div>
+
+        <!-- Box com logos -->
+        <div class="logos-box">
+            <div class="logo-item">
+                <div class="logo-fw">
+                    <img src="FW Logo.png" alt="FW Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <span>Galpão FW</span>
+            </div>
+            <div class="logo-item">
+                <div class="logo-delservin">DS</div>
+                <span>Delservin</span>
+            </div>
+            <div class="logo-item">
+                <div class="logo-altercon">AC</div>
+                <span>Altercon</span>
+            </div>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label>Status</label>
+                <select id="statusFilter">
+                    <option value="todos">Todos os Status</option>
+                    <option value="Disponível">Disponível</option>
+                    <option value="manutenção">Em Manutenção</option>
+                    <option value="danificado">Danificado</option>
+                    <option value="bom">Bom</option>
+                    <option value="reservado">Reservado</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Categoria</label>
+                <select id="categoriaFilter">
+                    <option value="todos">Todas as Categorias</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Buscar</label>
+                <input type="text" id="searchFilter" placeholder="Nome ou patrimônio...">
+            </div>
+            <div class="filter-group">
+                <label>&nbsp;</label>
+                <button class="btn btn-primary" onclick="carregarDados()">
+                    🔍 Aplicar Filtros
+                </button>
+            </div>
+        </div>
+
+        <div class="summary-cards" id="summaryCards">
+            <!-- Cards serão preenchidos dinamicamente -->
+        </div>
+
+        <!-- Barra de seleção -->
+        <div class="selection-bar">
+            <div class="selection-info">
+                <span><strong id="selectedCount">0</strong> itens selecionados</span>
+                <span style="margin-left: 20px;">Total: R$ <span id="selectedTotal">0,00</span></span>
+            </div>
+            <button class="btn btn-secondary" onclick="selecionarTodos()">
+                <i class="fas fa-check-double"></i> Selecionar Todos
+            </button>
+            <button class="btn btn-secondary" onclick="limparSelecao()">
+                <i class="fas fa-times"></i> Limpar Seleção
+            </button>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-success" onclick="gerarExcelRomaneio()">
+                📊 Gerar Excel (Layout Romaneio)
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table id="tabelaFerramentas">
+                <thead>
+                    <tr>
+                        <th class="checkbox-cell"><input type="checkbox" id="selectAllCheckbox"
+                                onclick="toggleAllCheckboxes(this)"></th>
+                        <th>Nº</th>
+                        <th>Patrimônio</th>
+                        <th>Ferramenta</th>
+                        <th>Status</th>
+                        <th>Valor (R$)</th>
+                        <th>Custo Conserto (R$)</th>
+                        <th>Valor Novo (R$)</th>
+                        <th>Diferença (R$)</th>
+                        <th>Economia %</th>
+                        <th>Decisão</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaBody">
+                    <tr>
+                        <td colspan="11" style="text-align: center; padding: 40px; color: #64748b;">
+                            <i class="fas fa-database" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                            <br>
+                            Carregando ferramentas da nuvem...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURAÇÃO SUPABASE
+        // ============================================
+        const SUPABASE_CONFIG = {
+            url: 'https://eokhafnfmynhridksnuh.supabase.co',
+            key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVva2hhZm5mbXluaHJpZGtzbnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMzYwMDIsImV4cCI6MjA4NTcxMjAwMn0.-RZtzUYpdOI4_WKOmP9lqw9guJmvh8XFeAL6UXhA4vo'
+        };
+
+        // Dados globais
+        let ferramentas = [];
+        let categorias = [];
+        let custosConserto = {};
+        let precosNovo = {};
+        let selectedItems = new Set();
+
+        // ============================================
+        // BUSCAR DADOS DO SUPABASE (TODAS AS FERRAMENTAS)
+        // ============================================
+        async function buscarTodasFerramentas() {
+            try {
+                const url = `${SUPABASE_CONFIG.url}/rest/v1/tools?select=*`;
+
+                const response = await fetch(url, {
+                    headers: {
+                        'apikey': SUPABASE_CONFIG.key,
+                        'Authorization': `Bearer ${SUPABASE_CONFIG.key}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+
+                const dados = await response.json();
+                console.log('Ferramentas carregadas:', dados.length);
+                return dados;
+
+            } catch (error) {
+                console.error('Erro ao buscar dados:', error);
+                return [];
+            }
+        }
+
+        // ============================================
+        // CARREGAR DADOS
+        // ============================================
+        async function carregarDados() {
+            document.getElementById('loading').classList.add('active');
+
+            try {
+                // Buscar todas as ferramentas
+                const dados = await buscarTodasFerramentas();
+
+                if (dados && dados.length > 0) {
+                    // Mapear dados da tabela tools
+                    ferramentas = dados.map(tool => ({
+                        id: tool.id,
+                        patrimonio: tool.patrimonio || tool.code || `ID-${tool.id}`,
+                        nome: tool.name || 'Sem nome',
+                        categoria: tool.category || 'Geral',
+                        status: tool.status || 'Disponível',
+                        valor_compra: tool.preco || 0
+                    }));
+
+                    // Extrair categorias únicas para o filtro
+                    categorias = [...new Set(ferramentas.map(f => f.categoria))];
+
+                    // Atualizar filtro de categorias
+                    const catSelect = document.getElementById('categoriaFilter');
+                    catSelect.innerHTML = '<option value="todos">Todas as Categorias</option>';
+                    categorias.sort().forEach(cat => {
+                        catSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+                    });
+
+                    aplicarFiltros();
+                } else {
+                    carregarDadosExemplo();
+                }
+
+            } catch (error) {
+                console.error('Erro:', error);
+                carregarDadosExemplo();
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        // ============================================
+        // DADOS DE EXEMPLO (CASO NÃO CONECTE)
+        // ============================================
+        function carregarDadosExemplo() {
+            ferramentas = [
+                { id: 1, patrimonio: '1825-C', nome: 'Carregador GAL 1880 CV', categoria: 'Ferramentas à Bateria', status: 'Disponível', valor_compra: 450 },
+                { id: 2, patrimonio: '1828', nome: 'Escada Plataforma 3 Degraus', categoria: 'Ferramentas Manuais', status: 'Disponível', valor_compra: 380 },
+                { id: 3, patrimonio: 'SN-1', nome: 'Esmerilhadeira Angular Bosch GWS 700', categoria: 'Máquinas', status: 'manutenção', valor_compra: 800 },
+                { id: 4, patrimonio: 'IP-1706', nome: 'Furadeira Impacto Milwaukee', categoria: 'Ferramentas Manuais', status: 'danificado', valor_compra: 1300 },
+                { id: 5, patrimonio: '0973', nome: 'Furadeira Martelete Hilti t2', categoria: 'Ferramentas Elétricas', status: 'manutenção', valor_compra: 950 },
+                { id: 6, patrimonio: '0594', nome: 'Máquina de Solda 200A MINI200', categoria: 'Ferramentas Elétricas', status: 'Disponível', valor_compra: 2500 },
+                { id: 7, patrimonio: 'IP-0655', nome: 'Máquina de Solda 200A MINI200', categoria: 'Máquinas', status: 'danificado', valor_compra: 2000 },
+                { id: 8, patrimonio: '1847', nome: 'Paleteira Hidráulica TN 2500', categoria: 'Veículos', status: 'Disponível', valor_compra: 1200 },
+                { id: 9, patrimonio: '1206', nome: 'Serra Circular Bosch GKS 190', categoria: 'Ferramentas Elétricas', status: 'manutenção', valor_compra: 2600 },
+                { id: 10, patrimonio: 'F001', nome: 'Parafusadeira Bosch', categoria: 'Ferramentas Elétricas', status: 'reservado', valor_compra: 350 }
+            ];
+
+            categorias = [...new Set(ferramentas.map(f => f.categoria))];
+
+            const catSelect = document.getElementById('categoriaFilter');
+            catSelect.innerHTML = '<option value="todos">Todas as Categorias</option>';
+            categorias.sort().forEach(cat => {
+                catSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+
+            aplicarFiltros();
+        }
+
+        // ============================================
+        // APLICAR FILTROS
+        // ============================================
+        function aplicarFiltros() {
+            const status = document.getElementById('statusFilter').value;
+            const categoria = document.getElementById('categoriaFilter').value;
+            const busca = document.getElementById('searchFilter').value.toLowerCase();
+
+            let filtradas = ferramentas.filter(f => {
+                // Filtro de status com case insensitive
+                if (status !== 'todos') {
+                    const statusFerramenta = f.status ? f.status.toLowerCase() : '';
+                    const statusFiltro = status.toLowerCase();
+
+                    if (statusFiltro === 'manutenção' && !statusFerramenta.includes('manuten')) return false;
+                    else if (statusFiltro === 'danificado' && !statusFerramenta.includes('danific')) return false;
+                    else if (statusFiltro === 'disponível' && !statusFerramenta.includes('dispon')) return false;
+                    else if (statusFiltro === 'bom' && !statusFerramenta.includes('bom')) return false;
+                    else if (statusFiltro === 'reservado' && !statusFerramenta.includes('reserv')) return false;
+                }
+
+                // Filtro de categoria
+                if (categoria !== 'todos' && f.categoria !== categoria) return false;
+
+                // Filtro de busca
+                if (busca) {
+                    const nomeMatch = f.nome ? f.nome.toLowerCase().includes(busca) : false;
+                    const patrimMatch = f.patrimonio ? f.patrimonio.toLowerCase().includes(busca) : false;
+                    if (!nomeMatch && !patrimMatch) return false;
+                }
+
+                return true;
+            });
+
+            atualizarTabela(filtradas);
+            atualizarCards(filtradas);
+            atualizarResumoSelecao();
+        }
+
+        // ============================================
+        // ATUALIZAR TABELA (SEM CATEGORIA)
+        // ============================================
+        function atualizarTabela(ferramentasFiltradas) {
+            const tbody = document.getElementById('tabelaBody');
+
+            if (ferramentasFiltradas.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="11" style="text-align: center; padding: 40px; color: #64748b;">
+                            Nenhuma ferramenta encontrada
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let html = '';
+            let totalGeral = 0;
+
+            ferramentasFiltradas.forEach((ferramenta, index) => {
+                const custoConserto = custosConserto[ferramenta.id] || 0;
+                const valorNovo = precosNovo[ferramenta.id] || 0;
+
+                let diferenca = 0;
+                let economiaPercentual = 0;
+                let decisao = 'A DEFINIR';
+
+                if (custoConserto > 0 && valorNovo > 0) {
+                    diferenca = valorNovo - custoConserto;
+                    economiaPercentual = valorNovo > 0 ? ((diferenca / valorNovo) * 100).toFixed(1) : 0;
+                    decisao = diferenca > 0 ? 'CONSERTAR' : 'COMPRAR NOVO';
+                }
+
+                const selectedClass = selectedItems.has(ferramenta.id) ? 'selected' : '';
+
+                // CORREÇÃO: Determinar a classe CSS correta para o status
+                let statusClass = '';
+                const statusLower = ferramenta.status ? ferramenta.status.toLowerCase() : '';
+
+                if (statusLower.includes('danific')) {
+                    statusClass = 'Danificado';
+                } else if (statusLower.includes('manuten')) {
+                    statusClass = 'Manutenção';
+                } else if (statusLower.includes('dispon')) {
+                    statusClass = 'Disponível';
+                } else if (statusLower.includes('bom')) {
+                    statusClass = 'Bom';
+                } else if (statusLower.includes('reserv')) {
+                    statusClass = 'Reservado';
+                } else {
+                    statusClass = 'Disponível';
+                }
+
+                totalGeral += ferramenta.valor_compra || 0;
+
+                html += `
+                    <tr class="${selectedClass}">
+                        <td class="checkbox-cell">
+                            <input type="checkbox" 
+                                   ${selectedItems.has(ferramenta.id) ? 'checked' : ''}
+                                   onchange="toggleItemSelection(${ferramenta.id}, this.checked)">
+                        </td>
+                        <td>${index + 1}</td>
+                        <td><strong>${ferramenta.patrimonio}</strong></td>
+                        <td>${ferramenta.nome}</td>
+                        <td>
+                            <span class="status-badge status-${statusClass}">
+                                ${ferramenta.status}
+                            </span>
+                        </td>
+                        <td>R$ ${(ferramenta.valor_compra || 0).toFixed(2)}</td>
+                        <td>
+                            <input type="text" class="valor-input" 
+                                   value="${custoConserto > 0 ? custoConserto.toFixed(2).replace('.', ',') : ''}"
+                                   onchange="atualizarCustoConserto(${ferramenta.id}, this.value)"
+                                   placeholder="0,00">
+                        </td>
+                        <td>
+                            <input type="text" class="valor-input" 
+                                   value="${valorNovo > 0 ? valorNovo.toFixed(2).replace('.', ',') : ''}"
+                                   onchange="atualizarPrecoNovo(${ferramenta.id}, this.value)"
+                                   placeholder="0,00">
+                        </td>
+                        <td style="color: ${diferenca > 0 ? '#34d399' : '#f87171'}; font-weight: bold;">
+                            ${diferenca !== 0 ? (diferenca > 0 ? '+' : '') + 'R$ ' + diferenca.toFixed(2) : ''}
+                        </td>
+                        <td style="color: ${economiaPercentual > 0 ? '#34d399' : '#f87171'};">
+                            ${economiaPercentual !== 0 ? economiaPercentual + '%' : ''}
+                        </td>
+                        <td>
+                            ${decisao !== 'A DEFINIR' ?
+                        `<span class="decision-badge decision-${decisao === 'CONSERTAR' ? 'repair' : 'buy'}">
+                                    ${decisao}
+                                </span>` :
+                        '<span style="color: #64748b;">-</span>'}
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // ============================================
+        // ATUALIZAR CARDS
+        // ============================================
+        function atualizarCards(ferramentasFiltradas) {
+            let totalConserto = 0;
+            let totalNovo = 0;
+            let totalEconomia = 0;
+
+            ferramentasFiltradas.forEach(f => {
+                const custoConserto = custosConserto[f.id] || 0;
+                const valorNovo = precosNovo[f.id] || 0;
+
+                totalConserto += custoConserto;
+                totalNovo += valorNovo;
+
+                if (custoConserto > 0 && valorNovo > 0 && valorNovo > custoConserto) {
+                    totalEconomia += (valorNovo - custoConserto);
+                }
+            });
+
+            const cardsHtml = `
+                <div class="card total">
+                    <h3>Total Ferramentas</h3>
+                    <div class="value">${ferramentasFiltradas.length}</div>
+                    <div class="subtitle">itens analisados</div>
+                </div>
+                <div class="card repair">
+                    <h3>Custo Total Conserto</h3>
+                    <div class="value">R$ ${totalConserto.toFixed(2)}</div>
+                    <div class="subtitle">valores digitados</div>
+                </div>
+                <div class="card buy">
+                    <h3>Custo Total Novo</h3>
+                    <div class="value">R$ ${totalNovo.toFixed(2)}</div>
+                    <div class="subtitle">valores digitados</div>
+                </div>
+                <div class="card savings">
+                    <h3>Economia Potencial</h3>
+                    <div class="value">R$ ${totalEconomia.toFixed(2)}</div>
+                    <div class="subtitle">optando por consertar</div>
+                </div>
+            `;
+
+            document.getElementById('summaryCards').innerHTML = cardsHtml;
+        }
+
+        // ============================================
+        // FUNÇÕES DE SELEÇÃO
+        // ============================================
+        function toggleItemSelection(id, checked) {
+            if (checked) selectedItems.add(id);
+            else selectedItems.delete(id);
+            atualizarResumoSelecao();
+            aplicarFiltros();
+        }
+
+        function selecionarTodos() {
+            ferramentas.forEach(f => selectedItems.add(f.id));
+            aplicarFiltros();
+        }
+
+        function limparSelecao() {
+            selectedItems.clear();
+            aplicarFiltros();
+        }
+
+        function toggleAllCheckboxes(checkbox) {
+            if (checkbox.checked) {
+                ferramentas.forEach(f => selectedItems.add(f.id));
+            } else {
+                selectedItems.clear();
+            }
+            aplicarFiltros();
+        }
+
+        function atualizarResumoSelecao() {
+            const selecionados = ferramentas.filter(f => selectedItems.has(f.id));
+            const totalSelecionado = selecionados.reduce((acc, f) => acc + (f.valor_compra || 0), 0);
+
+            document.getElementById('selectedCount').innerHTML = selecionados.length;
+            document.getElementById('selectedTotal').innerHTML = totalSelecionado.toFixed(2).replace('.', ',');
+        }
+
+        // ============================================
+        // ATUALIZAR VALORES DIGITADOS
+        // ============================================
+        function atualizarCustoConserto(id, valor) {
+            const num = parseFloat(valor.replace(',', '.')) || 0;
+            custosConserto[id] = num;
+            aplicarFiltros();
+        }
+
+        function atualizarPrecoNovo(id, valor) {
+            const num = parseFloat(valor.replace(',', '.')) || 0;
+            precosNovo[id] = num;
+            aplicarFiltros();
+        }
+
+        // ============================================
+        // GERAR EXCEL COM LAYOUT DO ROMANEIO
+        // ============================================
+        function gerarExcelRomaneio() {
+            document.getElementById('loading').classList.add('active');
+
+            setTimeout(() => {
+                try {
+                    const selecionados = ferramentas.filter(f => selectedItems.has(f.id));
+
+                    if (selecionados.length === 0) {
+                        alert('Selecione pelo menos um item para exportar');
+                        document.getElementById('loading').classList.remove('active');
+                        return;
+                    }
+
+                    const wb = XLSX.utils.book_new();
+
+                    // PLANILHA 1: ROMANEIO (LAYOUT IDÊNTICO AO SEU)
+                    const dadosRomaneio = [
+                        ['', 'ROMANEIO', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+                        ['', 'Nº', 'RM-2026-798754', '', '', '', '', '', '', '', '', '', '', '', '', '', 'DATA:', '23/01/2026'],
+                        [''],
+                        ['', 'REMETENTE:', '', 'Delservin Comércio e Serviços Industriais Ltda. - DESTINATÁRIO: Galpão FW, Imperatriz-MA', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+                        ['', 'END. REMT.:', '', 'Rua da Urca, 213 - Jd. Guanabara / Americana-SP', '', '', '', '', '', '', 'CNPJ:', '', '', '', '', '', '', ''],
+                        ['', 'CNPJ:', '', '01.864.998/0001-35', '', '', '', '', '', '', 'END.:', '', '', '', '', '', '', ''],
+                        ['', 'MOTORISTA:', '', 'Fabio Mendes R', '', '', '', '', '', '', 'CEP:', '', '', '', '', '', '', ''],
+                        ['', 'TRANSPORTE:', '', 'FW Transportes', '', '', '', '', '', '', 'CEN. DE CUST.:', 'ALMOXARIFADO', '', '', '', '', '', ''],
+                        [''],
+                        ['', 'Nº', 'DESCRIÇÃO DE MATERIAL', '', '', '', '', '', '', '', 'N.C.M.', 'Nº PATR.', 'QTD.', 'DESCRIÇÃO', '', '', 'VAL. UNIT', '']
+                    ];
+
+                    selecionados.forEach((item, index) => {
+                        dadosRomaneio.push([
+                            '',
+                            index + 1,
+                            item.nome,
+                            '', '', '', '', '', '', '',
+                            '',  // NCM (vazio)
+                            item.patrimonio,
+                            '1',
+                            item.categoria || '',
+                            '', '',
+                            (item.valor_compra || 0).toFixed(2).replace('.', ','),
+                            ''
+                        ]);
+                    });
+
+                    const totalValor = selecionados.reduce((acc, item) => acc + (item.valor_compra || 0), 0);
+                    dadosRomaneio.push(['', 'TOTAL', '', '', '', '', '', '', '', '', '', '', '', '', '', '', totalValor.toFixed(2).replace('.', ','), '']);
+                    dadosRomaneio.push(['']);
+                    dadosRomaneio.push(['', 'OBSERVAÇÕES: Análise para conserto vs compra', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+                    dadosRomaneio.push(['']);
+                    dadosRomaneio.push(['', 'Responsável pelo Romaneio:', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+                    dadosRomaneio.push(['', '________________________________________', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+                    dadosRomaneio.push(['', 'Fabio Mendes R', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+
+                    const wsRomaneio = XLSX.utils.aoa_to_sheet(dadosRomaneio);
+
+                    wsRomaneio['!cols'] = [
+                        { wch: 5 }, { wch: 5 }, { wch: 45 }, { wch: 5 }, { wch: 5 },
+                        { wch: 5 }, { wch: 5 }, { wch: 5 }, { wch: 5 }, { wch: 5 },
+                        { wch: 15 }, { wch: 15 }, { wch: 8 }, { wch: 20 }, { wch: 5 },
+                        { wch: 5 }, { wch: 15 }, { wch: 5 }
+                    ];
+
+                    XLSX.utils.book_append_sheet(wb, wsRomaneio, 'ROMANEIO');
+
+                    // PLANILHA 2: ANÁLISE
+                    const dadosAnalise = selecionados.map((item, index) => ({
+                        'Nº': index + 1,
+                        'Patrimônio': item.patrimonio,
+                        'Ferramenta': item.nome,
+                        'Status': item.status,
+                        'Valor Atual (R$)': (item.valor_compra || 0).toFixed(2).replace('.', ','),
+                        'Custo Conserto (R$)': (custosConserto[item.id] || 0).toFixed(2).replace('.', ','),
+                        'Preço Novo (R$)': (precosNovo[item.id] || 0).toFixed(2).replace('.', ','),
+                        'Economia (R$)': ((precosNovo[item.id] || 0) - (custosConserto[item.id] || 0)).toFixed(2).replace('.', ','),
+                        'Decisão': (precosNovo[item.id] || 0) > (custosConserto[item.id] || 0) ? 'CONSERTAR' : 'COMPRAR NOVO'
+                    }));
+
+                    const wsAnalise = XLSX.utils.json_to_sheet(dadosAnalise);
+                    XLSX.utils.book_append_sheet(wb, wsAnalise, 'Análise Comparativa');
+
+                    const dataAtual = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+                    XLSX.writeFile(wb, `romaneio_analise_${dataAtual}.xlsx`);
+
+                    document.getElementById('loading').classList.remove('active');
+
+                } catch (error) {
+                    console.error('Erro:', error);
+                    document.getElementById('loading').classList.remove('active');
+                    alert('Erro ao gerar Excel');
+                }
+            }, 500);
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        document.getElementById('statusFilter').addEventListener('change', aplicarFiltros);
+        document.getElementById('categoriaFilter').addEventListener('change', aplicarFiltros);
+        document.getElementById('searchFilter').addEventListener('keyup', aplicarFiltros);
+
+        // Carregar dados ao iniciar
+        window.addEventListener('load', carregarDados);
+    </script>
+</body>
+
+</html>
