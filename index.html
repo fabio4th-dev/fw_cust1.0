@@ -492,6 +492,7 @@
             0% {
                 transform: rotate(0deg);
             }
+
             100% {
                 transform: rotate(360deg);
             }
@@ -527,7 +528,8 @@
 <body>
     <!-- Loading com logos -->
     <div class="loading" id="loading">
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh;">
+        <div
+            style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh;">
             <div style="display: flex; align-items: center; gap: 30px; margin-bottom: 40px;">
                 <img src="FW Logo.png" alt="FW" style="width: 150px; height: 30px; object-fit: contain;">
                 <img src="Altercon Logo.png" alt="Altercon" style="width: 150px; height: 30px; object-fit: contain;">
@@ -744,9 +746,9 @@
         // ============================================
         function calcularDecisao(custoConserto, precoNovo) {
             if (custoConserto <= 0 || precoNovo <= 0) return 'A DEFINIR';
-            
+
             const percentualCusto = custoConserto / precoNovo;
-            
+
             if (percentualCusto <= LIMIAR_VIABILIDADE) {
                 return 'CONSERTAR';
             } else {
@@ -796,7 +798,7 @@
                 console.error('Erro ao buscar do Supabase:', error);
                 document.getElementById('infoMessage').innerHTML = 'Erro ao conectar. Use "Importar CSV" para dados offline.';
                 document.getElementById('infoIcon').className = 'fas fa-exclamation-triangle';
-                
+
                 criarDadosExemplo();
                 alert('Erro ao conectar ao Supabase. Dados de exemplo foram carregados para teste.');
 
@@ -817,14 +819,14 @@
             ];
 
             categorias = [...new Set(ferramentas.map(f => f.categoria))];
-            
+
             precosNovo = {
                 1: 800,
                 2: 200,
                 3: 890,
                 4: 35
             };
-            
+
             custosConserto = {
                 1: 100,
                 2: 210,
@@ -871,10 +873,10 @@
 
         function alternarVisualizacao(tipo) {
             visualizacaoAtual = tipo;
-            
+
             document.getElementById('viewAllBtn').classList.toggle('active', tipo === 'todos');
             document.getElementById('viewSelectedBtn').classList.toggle('active', tipo === 'selecionados');
-            
+
             aplicarFiltros();
         }
 
@@ -1077,7 +1079,7 @@
 
         function atualizarCards() {
             const itensSelecionados = ferramentas.filter(f => selectedItems.has(f.id));
-            
+
             let totalConserto = 0;
             let totalNovo = 0;
 
@@ -1085,7 +1087,7 @@
                 totalConserto += custosConserto[f.id] || 0;
                 totalNovo += precosNovo[f.id] || 0;
             });
-            
+
             const economiaTotal = totalNovo - totalConserto;
 
             const cardsHtml = `
@@ -1159,7 +1161,7 @@
         }
 
         // ============================================
-        // NOVA FUNÇÃO: GERAR EXCEL COM LAYOUT CORRETO
+        // GERAR EXCEL USANDO SEU ARQUIVO COMO TEMPLATE
         // ============================================
         async function gerarExcelComparativo() {
             document.getElementById('loading').classList.add('active');
@@ -1174,155 +1176,149 @@
                     return;
                 }
 
-                // Criar workbook com ExcelJS
-                const workbook = new ExcelJS.Workbook();
-                const worksheet = workbook.addWorksheet('Planilha1');
+                // ============================================
+                // 1. CARREGAR SEU ARQUIVO BASE
+                // ============================================
+                const response = await fetch('Analise Comparativa (Base).xlsx');
+                const templateBuffer = await response.arrayBuffer();
 
-                // Calcular totais
+                // 2. ABRIR O WORKBOOK
+                const workbook = new ExcelJS.Workbook();
+                await workbook.xlsx.load(templateBuffer);
+
+                // 3. PEGAR A PLANILHA
+                const worksheet = workbook.getWorksheet('Planilha1');
+
+                if (!worksheet) {
+                    throw new Error('Planilha "Planilha1" não encontrada');
+                }
+
+                // 4. CALCULAR OS NOVOS VALORES
                 let totalCustoConserto = 0;
                 let totalCustoNovo = 0;
-                
+
                 selecionados.forEach(item => {
                     totalCustoConserto += custosConserto[item.id] || 0;
                     totalCustoNovo += precosNovo[item.id] || 0;
                 });
-                
+
                 const economiaTotal = totalCustoNovo - totalCustoConserto;
 
-                // Data atual
+                // Data atual (formato YYYY-MM-DD HH:MM:SS igual ao template)
                 const hoje = new Date();
-                const dataFormatada = formatarDataBR(hoje);
-                
-                // Número do documento (formato AC-2026-798754)
-                const numDocumento = `AC-${hoje.getFullYear()}-${Math.floor(Math.random() * 900000 + 100000)}`;
+                const ano = hoje.getFullYear();
+                const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+                const dia = String(hoje.getDate()).padStart(2, '0');
+                const dataFormatada = `${ano}-${mes}-${dia} 00:00:00`;
 
-                // ===== CABEÇALHO =====
-                worksheet.mergeCells('A1:H1');
-                worksheet.getCell('A1').value = 'COMPARATIVO: CONSERTO X COMPRA';
-                worksheet.getCell('A1').font = { bold: true, size: 14 };
-                worksheet.getCell('A1').alignment = { horizontal: 'center' };
+                // Número do documento (formato AC-ANO-NÚMERO)
+                const numDocumento = `AC-${ano}-${Math.floor(Math.random() * 900000 + 100000)}`;
 
-                // Linha 2: Nº e DATA
-                worksheet.getCell('A2').value = 'Nº';
-                worksheet.getCell('A2').font = { bold: true };
-                worksheet.getCell('B2').value = numDocumento;
-                worksheet.getCell('F2').value = 'DATA:';
-                worksheet.getCell('F2').font = { bold: true };
-                worksheet.getCell('G2').value = dataFormatada;
+                // ============================================
+                // 5. ATUALIZAR VALORES NAS CÉLULAS CORRETAS
+                // ============================================
 
-                // Linha 4: Títulos das colunas de totais
-                worksheet.getCell('A4').value = 'FERRAMENTAS';
-                worksheet.getCell('A4').font = { bold: true };
-                
-                worksheet.getCell('C4').value = 'CUSTO TOTAL (CONSERTO)';
-                worksheet.getCell('C4').font = { bold: true };
-                
-                worksheet.getCell('D4').value = 'CUSTO TOTAL (NOVO)';
-                worksheet.getCell('D4').font = { bold: true };
-                
-                worksheet.getCell('G4').value = 'ECONOMIA';
-                worksheet.getCell('G4').font = { bold: true };
+                // LINHA 2
+                worksheet.getCell('B2').value = numDocumento;     // Nº do documento
+                worksheet.getCell('G2').value = dataFormatada;    // DATA
 
-                // Linha 5: Valores dos totais
-                worksheet.getCell('B5').value = selecionados.length;
-                worksheet.getCell('B5').font = { bold: true };
-                
-                worksheet.getCell('C5').value = totalCustoConserto;
-                worksheet.getCell('C5').numFmt = '"R$" #.##0,00';
-                
-                worksheet.getCell('D5').value = totalCustoNovo;
-                worksheet.getCell('D5').numFmt = '"R$" #.##0,00';
-                
-                worksheet.getCell('G5').value = economiaTotal;
-                worksheet.getCell('G5').numFmt = '"R$" #.##0,00';
+                // LINHA 5 - TOTAIS
+                worksheet.getCell('B5').value = selecionados.length; // Quantidade
+                worksheet.getCell('C5').value = totalCustoConserto;  // Total conserto
+                worksheet.getCell('D5').value = totalCustoNovo;      // Total novo
+                worksheet.getCell('G5').value = economiaTotal;       // Economia
 
-                // Linha 8: Cabeçalho da tabela
-                const headers = ['Nº', 'Nº PATR.', 'DESCRIÇÃO DE MATERIAL', 'STATUS', 'CUST. MANUT', 'NOVO', 'ECON. EM %', 'DECIS.'];
-                headers.forEach((header, index) => {
-                    const cell = worksheet.getCell(8, index + 1);
-                    cell.value = header;
-                    cell.font = { bold: true };
-                    cell.fill = {
-                        type: 'pattern',
-                        pattern: 'solid',
-                        fgColor: { argb: 'FFE0E0E0' }
-                    };
-                    cell.border = {
-                        top: { style: 'thin' },
-                        left: { style: 'thin' },
-                        bottom: { style: 'thin' },
-                        right: { style: 'thin' }
-                    };
-                });
+                // ============================================
+                // 6. LIMPAR DADOS DE EXEMPLO (LINHAS 9 E 10)
+                // ============================================
+                // Manter a formatação, só apagar os valores
+                for (let c = 1; c <= 8; c++) {
+                    worksheet.getCell(9, c).value = null;
+                    worksheet.getCell(10, c).value = null;
+                    worksheet.getCell(11, c).value = null;
+                    worksheet.getCell(12, c).value = null;
+                    worksheet.getCell(13, c).value = null;
+                    worksheet.getCell(14, c).value = null;
+                    worksheet.getCell(15, c).value = null;
+                    worksheet.getCell(16, c).value = null;
+                    worksheet.getCell(17, c).value = null;
+                    worksheet.getCell(18, c).value = null;
+                    worksheet.getCell(19, c).value = null;
+                    worksheet.getCell(20, c).value = null;
+                    worksheet.getCell(21, c).value = null;
+                    worksheet.getCell(22, c).value = null;
+                    worksheet.getCell(23, c).value = null;
+                    worksheet.getCell(24, c).value = null;
+                    worksheet.getCell(25, c).value = null;
+                    worksheet.getCell(26, c).value = null;
+                    worksheet.getCell(27, c).value = null;
+                    worksheet.getCell(28, c).value = null;
+                    worksheet.getCell(29, c).value = null;
+                    worksheet.getCell(30, c).value = null;
+                    worksheet.getCell(31, c).value = null;
+                    worksheet.getCell(32, c).value = null;
+                    worksheet.getCell(33, c).value = null;
+                    worksheet.getCell(34, c).value = null;
+                    worksheet.getCell(35, c).value = null;
+                    worksheet.getCell(36, c).value = null;
+                    worksheet.getCell(37, c).value = null;
+                    worksheet.getCell(38, c).value = null;
+                    worksheet.getCell(39, c).value = null;                                                                                
+                }
 
-                // ===== DADOS DA TABELA =====
+                // ============================================
+                // 7. INSERIR NOVOS DADOS A PARTIR DA LINHA 9
+                // ============================================
                 selecionados.forEach((item, index) => {
-                    const rowIndex = 9 + index;
+                    const rowNum = 9 + index; // 9, 10, 11, 12...
                     const custoConserto = custosConserto[item.id] || 0;
                     const precoNovo = precosNovo[item.id] || 0;
-                    const economiaPercentual = calcularEconomiaPercentual(custoConserto, precoNovo);
+
+                    // Calcular economia percentual (decimal, igual ao template: 0.875 ou -0.1)
+                    const economiaPercentual = precoNovo > 0 ? (precoNovo - custoConserto) / precoNovo : 0;
+
                     const decisao = calcularDecisao(custoConserto, precoNovo);
 
-                    // Nº
-                    worksheet.getCell(rowIndex, 1).value = index + 1;
-                    
-                    // Nº PATR.
-                    worksheet.getCell(rowIndex, 2).value = item.patrimonio;
-                    
-                    // DESCRIÇÃO DE MATERIAL
-                    worksheet.getCell(rowIndex, 3).value = item.nome;
-                    
-                    // STATUS (abreviar se for "Disponível")
+                    // Status (manter como está, se for "Disponível" vira "Disp.")
                     let statusDisplay = item.status;
-                    if (statusDisplay.toLowerCase().includes('dispon')) {
+                    if (statusDisplay && statusDisplay.toLowerCase().includes('dispon')) {
                         statusDisplay = 'Disp.';
                     }
-                    worksheet.getCell(rowIndex, 4).value = statusDisplay;
-                    
-                    // CUST. MANUT
-                    worksheet.getCell(rowIndex, 5).value = custoConserto;
-                    worksheet.getCell(rowIndex, 5).numFmt = '"R$" #.##0,00';
-                    
-                    // NOVO
-                    worksheet.getCell(rowIndex, 6).value = precoNovo;
-                    worksheet.getCell(rowIndex, 6).numFmt = '"R$" #.##0,00';
-                    
-                    // ECON. EM %
-                    worksheet.getCell(rowIndex, 7).value = economiaPercentual / 100;
-                    worksheet.getCell(rowIndex, 7).numFmt = '0.0%';
-                    
-                    // DECIS.
-                    worksheet.getCell(rowIndex, 8).value = decisao;
 
-                    // Aplicar bordas
-                    for (let col = 1; col <= 8; col++) {
-                        const cell = worksheet.getCell(rowIndex, col);
-                        cell.border = {
-                            top: { style: 'thin' },
-                            left: { style: 'thin' },
-                            bottom: { style: 'thin' },
-                            right: { style: 'thin' }
-                        };
-                    }
+                    // Coluna A: Nº
+                    worksheet.getCell(rowNum, 1).value = index + 1;
+
+                    // Coluna B: Nº PATR.
+                    worksheet.getCell(rowNum, 2).value = item.patrimonio;
+
+                    // Coluna C: DESCRIÇÃO
+                    worksheet.getCell(rowNum, 3).value = item.nome;
+
+                    // Coluna D: STATUS
+                    worksheet.getCell(rowNum, 4).value = statusDisplay;
+
+                    // Coluna E: CUST. MANUT
+                    worksheet.getCell(rowNum, 5).value = custoConserto;
+
+                    // Coluna F: NOVO
+                    worksheet.getCell(rowNum, 6).value = precoNovo;
+
+                    // Coluna G: ECON. EM %
+                    worksheet.getCell(rowNum, 7).value = economiaPercentual;
+
+                    // Coluna H: DECIS.
+                    worksheet.getCell(rowNum, 8).value = decisao;
                 });
 
-                // Ajustar larguras das colunas
-                worksheet.getColumn(1).width = 6;   // Nº
-                worksheet.getColumn(2).width = 12;  // Nº PATR.
-                worksheet.getColumn(3).width = 45;  // DESCRIÇÃO DE MATERIAL
-                worksheet.getColumn(4).width = 10;  // STATUS
-                worksheet.getColumn(5).width = 15;  // CUST. MANUT
-                worksheet.getColumn(6).width = 15;  // NOVO
-                worksheet.getColumn(7).width = 15;  // ECON. EM %
-                worksheet.getColumn(8).width = 12;  // DECIS.
-
-                // Gerar arquivo
+                // ============================================
+                // 8. GERAR O ARQUIVO
+                // ============================================
                 const buffer = await workbook.xlsx.writeBuffer();
                 const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `analise_comparativa_${hoje.toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`;
+                a.download = `analise_comparativa_${dia}-${mes}-${ano}.xlsx`;
                 a.click();
                 window.URL.revokeObjectURL(url);
 
